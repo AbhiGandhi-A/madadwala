@@ -1,0 +1,26 @@
+{
+  "name": "Madadwala – Ek Call Mein Madad",
+  "short_name": "Madadwala",
+  "description": "India ka local services app – Plumber, Electrician, Cleaning",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#F59E0B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"],
+  "lang": "hi-IN"
+}
