@@ -12,28 +12,31 @@ import {
   signInWithRedirect,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import type { UserRole } from '@/types';
 
 const STORAGE_KEY = 'madadwalaEmailForSignIn';
+const STORAGE_ROLE_KEY = 'madadwalaUserRole';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('customer');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [linkSent, setLinkSent] = useState(false);
   const router = useRouter();
+  const { userRole } = useAuth();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.replace('/dashboard');
-      }
-    });
-
-    return unsubscribe;
-  }, [router]);
+    // If user already has a role (authenticated), redirect
+    if (userRole) {
+      const redirectPath = userRole === 'provider' ? '/provider/dashboard' : '/home';
+      router.replace(redirectPath);
+    }
+  }, [userRole, router]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -51,9 +54,22 @@ export default function LoginPage() {
 
       setLoading(true);
       signInWithEmailLink(auth, emailForSignIn, currentUrl)
-        .then(() => {
+        .then(async (result) => {
           window.localStorage.removeItem(STORAGE_KEY);
-          router.push('/dashboard');
+          const userRole = window.localStorage.getItem(STORAGE_ROLE_KEY) as UserRole || 'customer';
+          window.localStorage.removeItem(STORAGE_ROLE_KEY);
+          
+          // Create user profile with role
+          const { createUser } = await import('@/lib/firestore-service');
+          await createUser(result.user.uid, {
+            email: emailForSignIn,
+            displayName: emailForSignIn.split('@')[0],
+            role: userRole,
+            uid: result.user.uid,
+          } as any);
+
+          const redirectPath = userRole === 'provider' ? '/provider/register' : '/home';
+          router.push(redirectPath);
         })
         .catch((err) => {
           console.error(err);
@@ -62,9 +78,23 @@ export default function LoginPage() {
         .finally(() => setLoading(false));
     } else {
       getRedirectResult(auth)
-        .then((result) => {
+        .then(async (result) => {
           if (result?.user) {
-            router.push('/dashboard');
+            const userRole = window.localStorage.getItem(STORAGE_ROLE_KEY) as UserRole || 'customer';
+            window.localStorage.removeItem(STORAGE_ROLE_KEY);
+            
+            // Create user profile with role
+            const { createUser } = await import('@/lib/firestore-service');
+            await createUser(result.user.uid, {
+              email: result.user.email || '',
+              displayName: result.user.displayName || result.user.email?.split('@')[0] || 'User',
+              profileImage: result.user.photoURL || undefined,
+              role: userRole,
+              uid: result.user.uid,
+            } as any);
+
+            const redirectPath = userRole === 'provider' ? '/provider/register' : '/home';
+            router.push(redirectPath);
           }
         })
         .catch((err) => {
@@ -94,8 +124,11 @@ export default function LoginPage() {
         handleCodeInApp: true,
       };
 
-      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      // Store email and selected role for later use
       window.localStorage.setItem(STORAGE_KEY, email);
+      window.localStorage.setItem(STORAGE_ROLE_KEY, selectedRole);
+
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       setLinkSent(true);
       setStatus('A secure login link has been sent to your inbox. Check your email and click the link to continue.');
     } catch (err) {
@@ -112,6 +145,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // Store selected role before redirect
+      window.localStorage.setItem(STORAGE_ROLE_KEY, selectedRole);
+      
       const provider = new GoogleAuthProvider();
       await signInWithRedirect(auth, provider);
     } catch (err) {
@@ -135,6 +171,32 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-white/80 mb-3">I am a</label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSelectedRole('customer')}
+                className={`flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-semibold transition ${
+                  selectedRole === 'customer'
+                    ? 'border-amber-400 bg-amber-400/20 text-amber-100'
+                    : 'border-white/15 bg-white/8 text-white/70 hover:border-white/30'
+                }`}
+              >
+                Customer
+              </button>
+              <button
+                onClick={() => setSelectedRole('provider')}
+                className={`flex-1 rounded-2xl border-2 px-4 py-3 text-sm font-semibold transition ${
+                  selectedRole === 'provider'
+                    ? 'border-emerald-400 bg-emerald-400/20 text-emerald-100'
+                    : 'border-white/15 bg-white/8 text-white/70 hover:border-white/30'
+                }`}
+              >
+                Service Provider
+              </button>
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-white/80 mb-2">Email address</label>
             <input

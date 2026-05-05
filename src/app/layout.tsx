@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { ToastContainer } from "@/components/common/Toast";
 
 export const metadata: Metadata = {
   title: "Madadwala - Plumber Electrician India | ₹30 Mein Unlock",
@@ -33,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="hi">
+    <html lang="hi" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -55,7 +59,16 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased bg-background text-foreground">
+        <ThemeProvider>
+          <AuthProvider>
+            <ToastProvider>
+              {children}
+              <ToastContainer />
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
