@@ -7,7 +7,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Modal } from '@/components/common/Modal';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
-import { createBooking, getUserById } from '@/lib/firestore-service';
 import { formatDate } from '@/lib/utils';
 import { ArrowLeft, Calendar, MapPin, Clock, IndianRupee } from 'lucide-react';
 import Link from 'next/link';
@@ -34,8 +33,13 @@ export default function BookingPage() {
   useEffect(() => {
     const loadProvider = async () => {
       try {
-        const data = await getUserById(providerId);
-        setProvider(data as Provider);
+        const response = await fetch(`/api/users/${providerId}`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProvider(data.data as Provider);
+        }
       } catch (error) {
         console.error('Error loading provider:', error);
         showError('Failed to load provider details');
@@ -58,6 +62,36 @@ export default function BookingPage() {
   const handleConfirmBooking = async () => {
     if (!user || !provider) return;
 
+    setLoading(true);
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId,
+          date: bookingData.date,
+          time: bookingData.time,
+          address: bookingData.address,
+          notes: bookingData.notes,
+        }),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        showSuccess('Booking created successfully!');
+        setConfirmModalOpen(false);
+        router.push('/customer/bookings');
+      } else {
+        showError(data.error || 'Failed to create booking');
+      }
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      showError('Failed to create booking');
+    } finally {
+      setLoading(false);
+    }
+  };
     setLoading(true);
     try {
       const bookingDateTime = new Date(`${bookingData.date}T${bookingData.time}`);

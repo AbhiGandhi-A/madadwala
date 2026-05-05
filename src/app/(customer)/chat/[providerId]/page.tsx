@@ -6,13 +6,6 @@ import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import {
-  findChatRoom,
-  createChatRoom,
-  addChatMessage,
-  getChatMessages,
-  getUserById,
-} from '@/lib/firestore-service';
 import { Send, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { ChatRoom, ChatMessage, Provider } from '@/types';
@@ -47,7 +40,10 @@ export default function ChatPage() {
         setLoading(true);
 
         // Get provider info
-        const providerData = (await getUserById(providerId)) as Provider;
+        const providerRes = await fetch(`/api/users/${providerId}`, {
+          credentials: 'include',
+        });
+        const providerData = providerRes.ok ? (await providerRes.json()).data : null;
         setProvider(providerData);
 
         // Find or create chat room

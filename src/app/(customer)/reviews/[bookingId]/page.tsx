@@ -7,15 +7,8 @@ import type { Booking } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
-import {
-  getBookingById,
-  createReview,
-  updateBooking,
-  getProviderReviews,
-  updateProviderRating,
-} from '@/lib/firestore-service';
 import Image from 'next/image';
-import { uploadReviewImage, isValidImageFile, getImagePreview } from '@/lib/storage-service';
+import { uploadReviewImage } from '@/lib/storage-service';
 import { calculateAverageRating } from '@/lib/utils';
 import { Star, Upload } from 'lucide-react';
 
@@ -38,8 +31,13 @@ export default function ReviewPage() {
   useEffect(() => {
     const loadBooking = async () => {
       try {
-        const data = await getBookingById(bookingId);
-        setBooking(data as Booking);
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setBooking(data.data as Booking);
+        }
       } catch (error) {
         console.error('Error loading booking:', error);
       }

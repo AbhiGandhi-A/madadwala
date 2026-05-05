@@ -6,7 +6,6 @@ import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useLocation } from '@/hooks/useLocation';
-import { getAllServices } from '@/lib/firestore-service';
 import type { Service } from '@/types';
 import { MapPin, Search, Star } from 'lucide-react';
 
@@ -20,8 +19,11 @@ export default function CustomerHomePage() {
     const loadServices = async () => {
       try {
         setLoading(true);
-        const fetchedServices = await getAllServices();
-        setServices(fetchedServices as Service[]);
+        const response = await fetch('/api/services');
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data.data || []);
+        }
       } catch (error) {
         console.error('Error loading services:', error);
       } finally {
