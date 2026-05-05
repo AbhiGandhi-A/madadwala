@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import { connectDB } from '@/lib/mongodb';
 import { SEED_SERVICES } from '@/lib/seed-services';
 
 /**
@@ -9,26 +8,33 @@ import { SEED_SERVICES } from '@/lib/seed-services';
  */
 export async function GET() {
   try {
+    const db = await connectDB();
+    
+    // Get services collection
+    const servicesCollection = db.collection('services');
+    
     // Check if services already exist
-    const servicesRef = collection(db, 'services');
-    const snapshot = await getDocs(servicesRef);
-
-    if (!snapshot.empty) {
+    const existingCount = await servicesCollection.countDocuments();
+    
+    if (existingCount > 0) {
       return NextResponse.json({
         success: true,
         message: 'Services already seeded',
-        count: snapshot.size,
+        count: existingCount,
       });
     }
 
-    // Add services to Firestore
+    // Add services to MongoDB
     const addedServices = [];
     for (const service of SEED_SERVICES) {
-      const docRef = await addDoc(servicesRef, {
+      const result = await servicesCollection.insertOne({
         ...service,
-        createdAt: Timestamp.now(),
+        createdAt: new Date(),
       });
-      addedServices.push({ id: docRef.id, ...service });
+      addedServices.push({ 
+        _id: result.insertedId, 
+        ...service 
+      });
     }
 
     return NextResponse.json({

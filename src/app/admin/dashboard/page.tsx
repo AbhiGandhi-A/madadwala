@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useToast } from '@/context/ToastContext';
-import { queryCollection, updateUser } from '@/lib/firestore-service';
 import { Users, Shield, TrendingUp, AlertCircle } from 'lucide-react';
-import { where } from 'firebase/firestore';
 import type { User, Provider } from '@/types';
 
 export default function AdminDashboardPage() {
@@ -26,16 +24,18 @@ export default function AdminDashboardPage() {
         setLoading(true);
 
         // Load users
-        const usersData = await queryCollection('users', [
-          where('role', '==', 'customer'),
-        ]);
-        setUsers(usersData as unknown as User[]);
+        const usersRes = await fetch('/api/users?role=customer');
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          setUsers(usersData.data || []);
+        }
 
         // Load providers
-        const providersData = await queryCollection('users', [
-          where('role', '==', 'provider'),
-        ]);
-        setProviders(providersData as unknown as Provider[]);
+        const providersRes = await fetch('/api/users?role=provider');
+        if (providersRes.ok) {
+          const providersData = await providersRes.json();
+          setProviders(providersData.data || []);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
         showError('Failed to load data');
@@ -50,17 +50,22 @@ export default function AdminDashboardPage() {
   const handleSuspendUser = async (uid: string) => {
     setSuspendingId(uid);
     try {
-      await updateUser(uid, {
-        status: 'suspended',
+      const res = await fetch(`/api/users/${uid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'suspended' }),
       });
 
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.uid === uid ? { ...u, status: 'suspended' } : u
-        )
-      );
-
-      showSuccess('User suspended successfully');
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.uid === uid ? { ...u, status: 'suspended' } : u
+          )
+        );
+        showSuccess('User suspended successfully');
+      } else {
+        showError('Failed to suspend user');
+      }
     } catch (error) {
       console.error('Error suspending user:', error);
       showError('Failed to suspend user');
@@ -71,17 +76,22 @@ export default function AdminDashboardPage() {
 
   const handleVerifyProvider = async (uid: string) => {
     try {
-      await updateUser(uid, {
-        verified: true,
+      const res = await fetch(`/api/users/${uid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified: true }),
       });
 
-      setProviders((prev) =>
-        prev.map((p) =>
-          p.uid === uid ? { ...p, verified: true } : p
-        )
-      );
-
-      showSuccess('Provider verified successfully');
+      if (res.ok) {
+        setProviders((prev) =>
+          prev.map((p) =>
+            p.uid === uid ? { ...p, verified: true } : p
+          )
+        );
+        showSuccess('Provider verified successfully');
+      } else {
+        showError('Failed to verify provider');
+      }
     } catch (error) {
       console.error('Error verifying provider:', error);
       showError('Failed to verify provider');
