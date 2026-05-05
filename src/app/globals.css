@@ -13,6 +13,20 @@
   --bg: #F8FAFC;
   --font-display: 'Baloo 2', sans-serif;
   --font-body: 'Noto Sans', sans-serif;
+  --background: #FFFFFF;
+  --foreground: #1F2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --foreground: #F3F4F6;
+  }
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #F3F4F6;
 }
 
 * {
