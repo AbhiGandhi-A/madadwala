@@ -28,7 +28,7 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [provider, setProvider] = useState<any>(null);
+  const [provider, setProvider] = useState<Partial<any> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -78,13 +78,13 @@ export default function ChatPage() {
 
     setSending(true);
     try {
-      const newMessage = await addChatMessage(chatRoom.id || chatRoom.id, {
+      const newMessage: ChatMessage = await addChatMessage(chatRoom.id || chatRoom.id, {
         senderId: user.uid,
         message: messageText,
         roomId: chatRoom.id || chatRoom.id,
-      } as any);
+      });
 
-      setMessages((prev) => [...prev, newMessage as ChatMessage]);
+      setMessages((prev) => [...prev, newMessage]);
       setMessageText('');
     } catch (error) {
       console.error('Error sending message:', error);

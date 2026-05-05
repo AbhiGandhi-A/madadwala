@@ -13,10 +13,10 @@ import {
   getProviderReviews,
   updateProviderRating,
 } from '@/lib/firestore-service';
+import Image from 'next/image';
 import { uploadReviewImage, isValidImageFile, getImagePreview } from '@/lib/storage-service';
 import { calculateAverageRating } from '@/lib/utils';
 import { Star, Upload } from 'lucide-react';
-import { useState as useStateEffect } from 'react';
 
 export default function ReviewPage() {
   const params = useParams();
@@ -31,10 +31,10 @@ export default function ReviewPage() {
   const [comment, setComment] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<Record<string, unknown> | null>(null);
 
   // Load booking details
-  useState(() => {
+  useEffect(() => {
     const loadBooking = async () => {
       try {
         const data = await getBookingById(bookingId);
@@ -44,7 +44,7 @@ export default function ReviewPage() {
       }
     };
     loadBooking();
-  });
+  }, [bookingId]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,24 +89,24 @@ export default function ReviewPage() {
       }
 
       // Create review
-      const review = await createReview({
+      await createReview({
         bookingId,
         customerId: user.uid,
-        providerId: booking.providerId,
+        providerId: booking.providerId as string,
         rating,
         title,
         comment,
         images: imageUrl ? [imageUrl] : [],
-      } as any);
+      });
 
       // Update booking with rating
       await updateBooking(bookingId, {
         rating,
-      } as any);
+      });
 
       // Update provider's average rating
-      const providerReviews = await getProviderReviews(booking.providerId);
-      const ratings = providerReviews.map((r: any) => r.rating);
+      const providerReviews = await getProviderReviews(booking.providerId as string);
+      const ratings = providerReviews.map((r) => r.rating);
       const avgRating = calculateAverageRating(ratings);
 
       await updateProviderRating(
@@ -224,9 +224,11 @@ export default function ReviewPage() {
 
                 {imagePreview && (
                   <div className="mb-4">
-                    <img
+                    <Image
                       src={imagePreview}
-                      alt="Review"
+                      alt="Review preview"
+                      width={400}
+                      height={300}
                       className="max-h-40 rounded-lg"
                     />
                   </div>

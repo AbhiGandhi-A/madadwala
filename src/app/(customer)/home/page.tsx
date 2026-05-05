@@ -14,7 +14,7 @@ export default function CustomerHomePage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const { location, error: locationError } = useLocation();
+  const { location } = useLocation();
 
   useEffect(() => {
     const loadServices = async () => {

@@ -4,22 +4,17 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteDoc,
   query,
   where,
   getDocs,
   orderBy,
   limit,
-  startAfter,
-  DocumentSnapshot,
   QueryConstraint,
   addDoc,
   Timestamp,
-  arrayUnion,
-  arrayRemove,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { User, Booking, Review, ChatRoom, ChatMessage, Service } from '@/types';
+import type { User, Booking, Review, ChatMessage, Service } from '@/types';
 
 // Check if Firestore is available
 const isFirestoreAvailable = () => {

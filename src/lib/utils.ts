@@ -172,8 +172,8 @@ export function isValidCoordinates(lat: number, lon: number): boolean {
 /**
  * Parse error message from Firebase error
  */
-export function getFirebaseErrorMessage(error: any): string {
-  const code = error?.code || "";
+export function getFirebaseErrorMessage(error: Record<string, unknown> | Error): string {
+  const code = (error as Record<string, unknown>)?.code || "";
   const messages: Record<string, string> = {
     "auth/weak-password": "Password is too weak. Use at least 6 characters.",
     "auth/email-already-in-use": "Email is already registered.",
@@ -186,13 +186,13 @@ export function getFirebaseErrorMessage(error: any): string {
       "An account with this email already exists.",
   };
 
-  return messages[code] || error?.message || "An error occurred.";
+  return messages[code as string] || (error as Record<string, unknown>)?.message || "An error occurred.";
 }
 
 /**
  * Convert Firestore timestamp to Date
  */
-export function firestoreTimestampToDate(timestamp: any): Date {
+export function firestoreTimestampToDate(timestamp: Record<string, unknown> | Date | string | null): Date {
   if (!timestamp) return new Date();
   if (timestamp instanceof Date) return timestamp;
   if (timestamp.toDate) return timestamp.toDate(); // Firestore timestamp
