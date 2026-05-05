@@ -8,13 +8,11 @@ import type { Provider } from '@/types';
 interface ServiceListProps {
   providers: Provider[];
   isLoading?: boolean;
-  onFilterChange?: (category: string) => void;
 }
 
 export function ServiceList({
   providers,
   isLoading = false,
-  onFilterChange,
 }: ServiceListProps) {
   const [filteredProviders, setFilteredProviders] = useState(providers);
 

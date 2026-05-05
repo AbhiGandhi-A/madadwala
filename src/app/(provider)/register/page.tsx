@@ -38,7 +38,7 @@ export default function ProviderRegistrationPage() {
     const loadServices = async () => {
       try {
         const data = await getAllServices();
-        setServices(data);
+        setServices(data as Service[]);
       } catch (error) {
         console.error('Error loading services:', error);
       }
@@ -100,7 +100,7 @@ export default function ProviderRegistrationPage() {
     try {
       const preview = await getImagePreview(file);
       setIdPreview(preview);
-    } catch (error) {
+    } catch {
       showError('Failed to preview image');
     }
   };
@@ -139,7 +139,7 @@ export default function ProviderRegistrationPage() {
         location: formData.location,
         idProofUrl: idProofUrl,
         verified: false, // Admin will verify later
-      } as any);
+      });
 
       showSuccess('Profile created! Admin will verify your details soon.');
       await refreshUserData();

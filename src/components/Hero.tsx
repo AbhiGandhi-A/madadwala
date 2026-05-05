@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Search, ChevronDown, Phone, Play, MapPin } from "lucide-react";
 
 const services = [

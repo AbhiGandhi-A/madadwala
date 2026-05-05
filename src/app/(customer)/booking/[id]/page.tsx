@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -8,7 +8,7 @@ import { Modal } from '@/components/common/Modal';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import { createBooking, getUserById } from '@/lib/firestore-service';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { ArrowLeft, Calendar, MapPin, Clock, IndianRupee } from 'lucide-react';
 import Link from 'next/link';
 import type { Provider, Booking } from '@/types';
@@ -31,7 +31,7 @@ export default function BookingPage() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   // Load provider data
-  useState(() => {
+  useEffect(() => {
     const loadProvider = async () => {
       try {
         const data = await getUserById(providerId);
@@ -42,7 +42,7 @@ export default function BookingPage() {
       }
     };
     loadProvider();
-  });
+  }, [providerId, showError]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +62,7 @@ export default function BookingPage() {
     try {
       const bookingDateTime = new Date(`${bookingData.date}T${bookingData.time}`);
       
-      const newBooking = await createBooking({
+      const bookingPayload: Partial<Booking> = {
         customerId: user.uid,
         providerId: provider.uid,
         serviceId: provider.serviceCategories[0], // First service category
@@ -74,7 +74,9 @@ export default function BookingPage() {
         },
         notes: bookingData.notes,
         estimatedPrice: provider.wallet?.balance || 300,
-      } as any);
+      };
+
+      await createBooking(bookingPayload);
 
       showSuccess('Booking requested successfully! Provider will respond soon.');
       setConfirmModalOpen(false);

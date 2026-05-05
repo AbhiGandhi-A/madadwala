@@ -186,7 +186,11 @@ export function getFirebaseErrorMessage(error: Record<string, unknown> | Error):
       "An account with this email already exists.",
   };
 
-  return messages[code as string] || (error as Record<string, unknown>)?.message || "An error occurred.";
+  const message = messages[code as string];
+  if (typeof message === 'string') return message;
+
+  const errorMessage = (error as Record<string, unknown>)?.message;
+  return typeof errorMessage === 'string' ? errorMessage : "An error occurred.";
 }
 
 /**
@@ -195,8 +199,14 @@ export function getFirebaseErrorMessage(error: Record<string, unknown> | Error):
 export function firestoreTimestampToDate(timestamp: Record<string, unknown> | Date | string | null): Date {
   if (!timestamp) return new Date();
   if (timestamp instanceof Date) return timestamp;
-  if (timestamp.toDate) return timestamp.toDate(); // Firestore timestamp
-  return new Date(timestamp);
+  if (
+    typeof timestamp !== 'string' &&
+    'toDate' in timestamp &&
+    typeof (timestamp as { toDate: unknown }).toDate === 'function'
+  ) {
+    return (timestamp as { toDate: () => Date }).toDate(); // Firestore timestamp
+  }
+  return new Date(timestamp as string);
 }
 
 /**

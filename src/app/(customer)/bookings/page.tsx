@@ -7,8 +7,8 @@ import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { getCustomerBookings, updateBooking } from '@/lib/firestore-service';
-import { formatDateTime, formatCurrency } from '@/lib/utils';
-import { Calendar, MapPin, User, DollarSign, X } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
+import { Calendar, MapPin, X } from 'lucide-react';
 import type { Booking } from '@/types';
 
 const statusColors = {
@@ -64,13 +64,7 @@ export default function BookingsPage() {
         status: 'cancelled',
         cancellationDate: new Date(),
         cancellationReason: 'Cancelled by customer',
-      } as any);
-
-      setBookings((prev) =>
-        prev.map((b) =>
-          b.id === bookingId ? { ...b, status: 'cancelled' } : b
-        )
-      );
+      });
 
       showSuccess('Booking cancelled successfully');
     } catch (error) {
@@ -111,7 +105,7 @@ export default function BookingsPage() {
                     : 'bg-white dark:bg-gray-800 text-foreground border border-gray-200 dark:border-gray-700 hover:border-primary'
                 }`}
               >
-                {option === 'in_progress' ? 'In Progress' : option}
+                {option === 'active' ? 'Active' : option}
               </button>
             ))}
           </div>
@@ -216,7 +210,7 @@ function BookingCard({
             </div>
           )}
 
-          {booking.status === 'completed' && !booking.rating && (
+          {booking.status === 'completed' && !(booking as Booking & { rating?: number }).rating && (
             <div className="text-xs text-amber-600 dark:text-amber-400">
               <p>Review pending</p>
             </div>
@@ -236,7 +230,7 @@ function BookingCard({
             </button>
           )}
 
-          {booking.status === 'completed' && !booking.rating && (
+          {booking.status === 'completed' && !(booking as Booking & { rating?: number }).rating && (
             <button className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-600 transition font-medium text-sm">
               Leave Review
             </button>

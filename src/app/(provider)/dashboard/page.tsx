@@ -7,8 +7,8 @@ import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { getProviderPendingRequests, getProviderBookings, updateBooking } from '@/lib/firestore-service';
-import { formatDateTime, formatCurrency } from '@/lib/utils';
-import { Briefcase, TrendingUp, CheckCircle, Clock, DollarSign } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
+import { Briefcase, CheckCircle, Clock, DollarSign } from 'lucide-react';
 import type { Booking } from '@/types';
 
 export default function ProviderDashboardPage() {
@@ -68,7 +68,7 @@ export default function ProviderDashboardPage() {
     try {
       await updateBooking(bookingId, {
         status: 'accepted',
-      } as any);
+      });
 
       setPendingRequests((prev) => prev.filter((r) => r.id !== bookingId));
       const booking = pendingRequests.find((r) => r.id === bookingId);
@@ -90,7 +90,7 @@ export default function ProviderDashboardPage() {
     try {
       await updateBooking(bookingId, {
         status: 'cancelled',
-      } as any);
+      });
 
       setPendingRequests((prev) => prev.filter((r) => r.id !== bookingId));
       showSuccess('Request rejected');

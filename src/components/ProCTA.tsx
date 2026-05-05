@@ -122,7 +122,7 @@ export default function ProCTA() {
               </div>
 
               <div className="mt-4 text-center text-gray-500 text-xs italic">
-                "Connect with customers and build on genuine service work."
+                &quot;Connect with customers and build on genuine service work.&quot;
               </div>
             </div>
           </div>

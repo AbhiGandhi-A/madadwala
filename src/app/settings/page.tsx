@@ -8,12 +8,17 @@ import { useTheme } from 'next-themes';
 import { updateUser } from '@/lib/firestore-service';
 import { useToast } from '@/context/ToastContext';
 import { Moon, Sun, Bell, Lock, LogOut } from 'lucide-react';
-import { getAuth, signOut } from 'firebase/auth';
+
+type UserPreferences = {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  marketingEmails: boolean;
+};
 import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { showSuccess, showError } = useToast();
   const { theme, setTheme } = useTheme();
 
@@ -26,8 +31,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     // Load preferences from user data if available
-    if ((user as any)?.preferences) {
-      setPreferences((user as any).preferences);
+    const prefs = user?.preferences as UserPreferences | undefined;
+    if (prefs) {
+      setPreferences(prefs);
     }
   }, [user]);
 
@@ -38,7 +44,7 @@ export default function SettingsPage() {
     try {
       await updateUser(user.uid, {
         preferences,
-      } as any);
+      });
       showSuccess('Preferences saved successfully');
     } catch (error) {
       console.error('Error saving preferences:', error);
@@ -50,7 +56,7 @@ export default function SettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);

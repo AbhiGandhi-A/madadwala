@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/common/Navbar';
+import type { Booking } from '@/types';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,14 +32,14 @@ export default function ReviewPage() {
   const [comment, setComment] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [loading, setLoading] = useState(false);
-  const [booking, setBooking] = useState<Record<string, unknown> | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
 
   // Load booking details
   useEffect(() => {
     const loadBooking = async () => {
       try {
         const data = await getBookingById(bookingId);
-        setBooking(data);
+        setBooking(data as Booking);
       } catch (error) {
         console.error('Error loading booking:', error);
       }
@@ -58,7 +59,7 @@ export default function ReviewPage() {
     try {
       const preview = await getImagePreview(file);
       setImagePreview(preview);
-    } catch (error) {
+    } catch {
       showError('Failed to preview image');
     }
   };
@@ -105,7 +106,7 @@ export default function ReviewPage() {
       });
 
       // Update provider's average rating
-      const providerReviews = await getProviderReviews(booking.providerId as string);
+      const providerReviews = (await getProviderReviews(booking.providerId as string)) as import('@/types').Review[];
       const ratings = providerReviews.map((r) => r.rating);
       const avgRating = calculateAverageRating(ratings);
 
@@ -119,8 +120,8 @@ export default function ReviewPage() {
       setTimeout(() => {
         router.push('/bookings');
       }, 1500);
-    } catch (error) {
-      console.error('Error submitting review:', error);
+    } catch (err) {
+      console.error('Error submitting review:', err);
       showError('Failed to submit review');
     } finally {
       setLoading(false);

@@ -29,14 +29,15 @@ const isFirestoreAvailable = () => {
  * USER OPERATIONS
  */
 
-export async function getUserById(uid: string) {
+export async function getUserById(uid: string): Promise<(User & { id: string }) | null> {
   try {
     if (!isFirestoreAvailable()) {
       return null;
     }
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() };
+      const data = userDoc.data() as User;
+      return { id: userDoc.id, ...data };
     }
     return null;
   } catch (error) {
@@ -150,11 +151,12 @@ export async function createService(serviceData: Partial<Service>) {
  * BOOKING OPERATIONS
  */
 
-export async function getBookingById(bookingId: string) {
+export async function getBookingById(bookingId: string): Promise<(Booking & { id: string }) | null> {
   try {
     const bookingDoc = await getDoc(doc(db, 'bookings', bookingId));
     if (bookingDoc.exists()) {
-      return { id: bookingDoc.id, ...bookingDoc.data() };
+      const data = bookingDoc.data() as Omit<Booking, 'id'>;
+      return { id: bookingDoc.id, ...data };
     }
     return null;
   } catch (error) {
@@ -192,7 +194,7 @@ export async function updateBooking(bookingId: string, updateData: Partial<Booki
   }
 }
 
-export async function getCustomerBookings(customerId: string) {
+export async function getCustomerBookings(customerId: string): Promise<(Booking & { id: string })[]> {
   try {
     const q = query(
       collection(db, 'bookings'),
@@ -200,17 +202,17 @@ export async function getCustomerBookings(customerId: string) {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<Booking, 'id'>;
+      return { id: doc.id, ...data };
+    });
   } catch (error) {
     console.error('Error fetching customer bookings:', error);
     throw error;
   }
 }
 
-export async function getProviderBookings(providerId: string) {
+export async function getProviderBookings(providerId: string): Promise<(Booking & { id: string })[]> {
   try {
     const q = query(
       collection(db, 'bookings'),
@@ -218,17 +220,17 @@ export async function getProviderBookings(providerId: string) {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<Booking, 'id'>;
+      return { id: doc.id, ...data };
+    });
   } catch (error) {
     console.error('Error fetching provider bookings:', error);
     throw error;
   }
 }
 
-export async function getProviderPendingRequests(providerId: string) {
+export async function getProviderPendingRequests(providerId: string): Promise<(Booking & { id: string })[]> {
   try {
     const q = query(
       collection(db, 'bookings'),
@@ -237,10 +239,10 @@ export async function getProviderPendingRequests(providerId: string) {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data() as Omit<Booking, 'id'>;
+      return { id: doc.id, ...data };
+    });
   } catch (error) {
     console.error('Error fetching pending requests:', error);
     throw error;

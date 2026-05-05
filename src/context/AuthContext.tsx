@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userData = await getUserById(firebaseUser.uid);
             
             if (userData) {
-              setUser(userData as User);
-              setUserRole((userData as any).role || null);
+              setUser(userData);
+              setUserRole(userData.role || null);
             } else {
               // User authenticated but no profile yet
               setUser(null);
@@ -98,8 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = await getUserById(firebaseUser.uid);
       
       if (userData) {
-        setUser(userData as User);
-        setUserRole((userData as any).role || null);
+        setUser(userData);
+        setUserRole(userData.role || null);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to refresh user data';

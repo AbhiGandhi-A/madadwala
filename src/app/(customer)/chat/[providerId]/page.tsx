@@ -15,7 +15,7 @@ import {
 } from '@/lib/firestore-service';
 import { Send, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import type { ChatRoom, ChatMessage } from '@/types';
+import type { ChatRoom, ChatMessage, Provider } from '@/types';
 
 export default function ChatPage() {
   const params = useParams();
@@ -28,7 +28,7 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [provider, setProvider] = useState<Partial<any> | null>(null);
+  const [provider, setProvider] = useState<Provider | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,7 +47,7 @@ export default function ChatPage() {
         setLoading(true);
 
         // Get provider info
-        const providerData = await getUserById(providerId);
+        const providerData = (await getUserById(providerId)) as Provider;
         setProvider(providerData);
 
         // Find or create chat room
@@ -55,7 +55,7 @@ export default function ChatPage() {
         if (!room) {
           room = await createChatRoom([user.uid, providerId]);
         }
-        setChatRoom(room);
+        setChatRoom(room as ChatRoom);
 
         // Load messages
         const msgs = await getChatMessages(room.id || room.id);
@@ -78,11 +78,11 @@ export default function ChatPage() {
 
     setSending(true);
     try {
-      const newMessage: ChatMessage = await addChatMessage(chatRoom.id || chatRoom.id, {
+      const newMessage = await addChatMessage(chatRoom.id || chatRoom.id, {
         senderId: user.uid,
         message: messageText,
         roomId: chatRoom.id || chatRoom.id,
-      });
+      }) as ChatMessage;
 
       setMessages((prev) => [...prev, newMessage]);
       setMessageText('');

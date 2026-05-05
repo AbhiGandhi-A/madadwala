@@ -18,7 +18,7 @@ import {
   Filter,
 } from 'lucide-react';
 import Link from 'next/link';
-import { where, orderBy } from 'firebase/firestore';
+import { where } from 'firebase/firestore';
 
 export default function ServiceListingPage() {
   const params = useParams();
@@ -46,7 +46,7 @@ export default function ServiceListingPage() {
           where('verified', '==', true),
         ]);
 
-        setProviders(providersData as Provider[]);
+        setProviders(providersData as unknown as Provider[]);
       } catch (error) {
         console.error('Error loading service:', error);
       } finally {

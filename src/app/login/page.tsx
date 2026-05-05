@@ -6,7 +6,6 @@ import {
   GoogleAuthProvider,
   getRedirectResult,
   isSignInWithEmailLink,
-  onAuthStateChanged,
   sendSignInLinkToEmail,
   signInWithEmailLink,
   signInWithRedirect,
@@ -66,7 +65,7 @@ export default function LoginPage() {
             displayName: emailForSignIn.split('@')[0],
             role: userRole,
             uid: result.user.uid,
-          } as any);
+          });
 
           const redirectPath = userRole === 'provider' ? '/provider/register' : '/home';
           router.push(redirectPath);
@@ -91,7 +90,7 @@ export default function LoginPage() {
               profileImage: result.user.photoURL || undefined,
               role: userRole,
               uid: result.user.uid,
-            } as any);
+            });
 
             const redirectPath = userRole === 'provider' ? '/provider/register' : '/home';
             router.push(redirectPath);

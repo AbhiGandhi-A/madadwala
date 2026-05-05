@@ -21,7 +21,7 @@ export default function CustomerHomePage() {
       try {
         setLoading(true);
         const fetchedServices = await getAllServices();
-        setServices(fetchedServices);
+        setServices(fetchedServices as Service[]);
       } catch (error) {
         console.error('Error loading services:', error);
       } finally {

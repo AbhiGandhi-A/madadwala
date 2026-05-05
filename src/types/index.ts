@@ -23,6 +23,13 @@ export interface BaseUser {
   displayName: string;
   profileImage?: string;
   phone?: string;
+  preferences?: {
+    notificationsEnabled?: boolean;
+    searchHistory?: string[];
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    marketingEmails?: boolean;
+  };
   role: UserRole;
   status: UserStatus;
   createdAt: Date;
@@ -36,8 +43,11 @@ export interface Customer extends BaseUser {
   role: 'customer';
   savedProviders: string[]; // Array of provider UIDs
   preferences?: {
-    notificationsEnabled: boolean;
-    searchHistory: string[];
+    notificationsEnabled?: boolean;
+    searchHistory?: string[];
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+    marketingEmails?: boolean;
   };
 }
 
@@ -118,6 +128,7 @@ export interface Booking {
   notes?: string;
   estimatedPrice: number;
   finalPrice?: number;
+  rating?: number;
   specialRequests?: string;
   paymentStatus?: PaymentStatus;
   cancellationReason?: string;

@@ -7,13 +7,13 @@ import { useToast } from '@/context/ToastContext';
 import { queryCollection, updateUser } from '@/lib/firestore-service';
 import { Users, Shield, TrendingUp, AlertCircle } from 'lucide-react';
 import { where } from 'firebase/firestore';
-import type { User } from '@/types';
+import type { User, Provider } from '@/types';
 
 export default function AdminDashboardPage() {
   const { showSuccess, showError } = useToast();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [providers, setProviders] = useState<User[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'providers'>(
     'overview'
@@ -29,13 +29,13 @@ export default function AdminDashboardPage() {
         const usersData = await queryCollection('users', [
           where('role', '==', 'customer'),
         ]);
-        setUsers(usersData as User[]);
+        setUsers(usersData as unknown as User[]);
 
         // Load providers
         const providersData = await queryCollection('users', [
           where('role', '==', 'provider'),
         ]);
-        setProviders(providersData as User[]);
+        setProviders(providersData as unknown as Provider[]);
       } catch (error) {
         console.error('Error loading data:', error);
         showError('Failed to load data');
@@ -47,12 +47,12 @@ export default function AdminDashboardPage() {
     loadData();
   }, [showError]);
 
-  const handleSuspendUser = async (uid: string, reason: string) => {
+  const handleSuspendUser = async (uid: string) => {
     setSuspendingId(uid);
     try {
       await updateUser(uid, {
         status: 'suspended',
-      } as any);
+      });
 
       setUsers((prev) =>
         prev.map((u) =>
@@ -73,7 +73,7 @@ export default function AdminDashboardPage() {
     try {
       await updateUser(uid, {
         verified: true,
-      } as any);
+      });
 
       setProviders((prev) =>
         prev.map((p) =>
@@ -88,8 +88,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const totalBookings = users.length + providers.length;
-  const verifiedProviders = providers.filter(p => (p as any).verified).length;
+  const verifiedProviders = providers.filter((p) => p.verified).length;
 
   return (
     <ProtectedRoute allowedRoles={['admin']}>
@@ -257,7 +256,7 @@ function UserRow({
   isSuspending,
 }: {
   user: User;
-  onSuspend: (uid: string, reason: string) => Promise<void>;
+  onSuspend: (uid: string) => Promise<void>;
   isSuspending: boolean;
 }) {
   return (
@@ -276,7 +275,7 @@ function UserRow({
         </span>
       </div>
       <button
-        onClick={() => onSuspend(user.uid, 'Violation of terms')}
+        onClick={() => onSuspend(user.uid)}
         disabled={isSuspending || user.status === 'suspended'}
         className="px-4 py-2 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition text-sm font-medium"
       >
@@ -295,12 +294,12 @@ function ProviderRow({
   onSuspend,
   isSuspending,
 }: {
-  provider: User;
+  provider: Provider;
   onVerify: (uid: string) => Promise<void>;
-  onSuspend: (uid: string, reason: string) => Promise<void>;
+  onSuspend: (uid: string) => Promise<void>;
   isSuspending: boolean;
 }) {
-  const providerData = provider as any;
+  const providerData = provider;
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
       <div className="flex items-center justify-between">
@@ -345,7 +344,7 @@ function ProviderRow({
             </button>
           )}
           <button
-            onClick={() => onSuspend(provider.uid, 'Violation')}
+            onClick={() => onSuspend(provider.uid)}
             disabled={isSuspending}
             className="px-4 py-2 rounded-lg border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition text-sm font-medium"
           >
