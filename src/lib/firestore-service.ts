@@ -21,12 +21,24 @@ import {
 import { db } from './firebase';
 import type { User, Booking, Review, ChatRoom, ChatMessage, Service } from '@/types';
 
+// Check if Firestore is available
+const isFirestoreAvailable = () => {
+  if (!db) {
+    console.warn('[Firestore] Database not initialized. Running in demo mode.');
+    return false;
+  }
+  return true;
+};
+
 /**
  * USER OPERATIONS
  */
 
 export async function getUserById(uid: string) {
   try {
+    if (!isFirestoreAvailable()) {
+      return null;
+    }
     const userDoc = await getDoc(doc(db, 'users', uid));
     if (userDoc.exists()) {
       return { id: userDoc.id, ...userDoc.data() };
@@ -34,12 +46,19 @@ export async function getUserById(uid: string) {
     return null;
   } catch (error) {
     console.error('Error fetching user:', error);
+    // Return null in demo mode instead of throwing
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      return null;
+    }
     throw error;
   }
 }
 
 export async function createUser(uid: string, userData: Partial<User>) {
   try {
+    if (!isFirestoreAvailable()) {
+      return { id: uid, ...userData };
+    }
     const userRef = doc(db, 'users', uid);
     const docData = {
       ...userData,
@@ -52,6 +71,9 @@ export async function createUser(uid: string, userData: Partial<User>) {
     return { id: uid, ...docData };
   } catch (error) {
     console.error('Error creating user:', error);
+    if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+      return { id: uid, ...userData };
+    }
     throw error;
   }
 }

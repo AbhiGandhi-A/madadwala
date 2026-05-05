@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/common/Navbar';
+import { DemoModeBanner } from '@/components/common/DemoModeBanner';
 import Hero from "@/components/Hero";
 import Categories from "@/components/Categories";
 import HowItWorks from "@/components/HowItWorks";
@@ -41,6 +42,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
+      <DemoModeBanner />
       <Navbar />
       <Hero />
       <Categories />

@@ -27,20 +27,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!auth) {
+      // Firebase not initialized (demo mode)
+      console.warn('[Auth] Firebase not initialized. Running in demo mode.');
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         setError(null);
         if (firebaseUser) {
           setFirebaseUser(firebaseUser);
           
-          // Fetch user data from Firestore
-          const userData = await getUserById(firebaseUser.uid);
-          
-          if (userData) {
-            setUser(userData as User);
-            setUserRole((userData as any).role || null);
-          } else {
-            // User authenticated but no profile yet
+          try {
+            // Fetch user data from Firestore
+            const userData = await getUserById(firebaseUser.uid);
+            
+            if (userData) {
+              setUser(userData as User);
+              setUserRole((userData as any).role || null);
+            } else {
+              // User authenticated but no profile yet
+              setUser(null);
+              setUserRole(null);
+            }
+          } catch (firestoreErr) {
+            console.warn('Could not fetch user data from Firestore:', firestoreErr);
+            // Allow auth to work without Firestore in demo mode
             setUser(null);
             setUserRole(null);
           }
