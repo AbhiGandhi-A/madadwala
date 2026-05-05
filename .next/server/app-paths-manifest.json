@@ -1,17 +1,6 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/seed/route": "app/api/seed/route.js",
-  "/(customer)/chat/[providerId]/page": "app/(customer)/chat/[providerId]/page.js",
-  "/(customer)/booking/[id]/page": "app/(customer)/booking/[id]/page.js",
-  "/(customer)/home/page": "app/(customer)/home/page.js",
-  "/(customer)/bookings/page": "app/(customer)/bookings/page.js",
-  "/(customer)/reviews/[bookingId]/page": "app/(customer)/reviews/[bookingId]/page.js",
-  "/(customer)/services/[id]/page": "app/(customer)/services/[id]/page.js",
-  "/(provider)/dashboard/page": "app/(provider)/dashboard/page.js",
-  "/(provider)/register/page": "app/(provider)/register/page.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/api/auth/me/route": "app/api/auth/me/route.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
   "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/settings/page": "app/settings/page.js",
-  "/setup/page": "app/setup/page.js"
+  "/login/page": "app/login/page.js"
 }

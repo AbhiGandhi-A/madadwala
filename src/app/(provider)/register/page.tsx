@@ -6,8 +6,7 @@ import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { updateUser, getAllServices } from '@/lib/firestore-service';
-import { uploadIdProof, isValidImageFile, getImagePreview } from '@/lib/storage-service';
+import { uploadIdProof } from '@/lib/storage-service';
 import { useLocation, reverseGeocode } from '@/hooks/useLocation';
 import { Upload, MapPin, FileText, Briefcase } from 'lucide-react';
 import type { Service } from '@/types';
@@ -37,8 +36,11 @@ export default function ProviderRegistrationPage() {
   useEffect(() => {
     const loadServices = async () => {
       try {
-        const data = await getAllServices();
-        setServices(data as Service[]);
+        const response = await fetch('/api/services');
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data.data || []);
+        }
       } catch (error) {
         console.error('Error loading services:', error);
       }

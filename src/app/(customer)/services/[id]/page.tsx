@@ -6,7 +6,6 @@ import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useLocation } from '@/hooks/useLocation';
-import { getServiceById, queryCollection } from '@/lib/firestore-service';
 import { calculateDistance } from '@/lib/utils';
 import type { Service, Provider } from '@/types';
 import {
@@ -18,7 +17,6 @@ import {
   Filter,
 } from 'lucide-react';
 import Link from 'next/link';
-import { where } from 'firebase/firestore';
 
 export default function ServiceListingPage() {
   const params = useParams();
@@ -36,17 +34,18 @@ export default function ServiceListingPage() {
         setLoading(true);
 
         // Fetch service details
-        const serviceData = await getServiceById(serviceId);
-        setService(serviceData as Service);
+        const serviceRes = await fetch(`/api/services/${serviceId}`);
+        if (serviceRes.ok) {
+          const serviceData = await serviceRes.json();
+          setService(serviceData.data);
+        }
 
         // Fetch providers offering this service
-        const providersData = await queryCollection('users', [
-          where('role', '==', 'provider'),
-          where('serviceCategories', 'array-contains', serviceId),
-          where('verified', '==', true),
-        ]);
-
-        setProviders(providersData as unknown as Provider[]);
+        const providersRes = await fetch(`/api/providers?serviceId=${serviceId}`);
+        if (providersRes.ok) {
+          const providersData = await providersRes.json();
+          setProviders(providersData.data || []);
+        }
       } catch (error) {
         console.error('Error loading service:', error);
       } finally {

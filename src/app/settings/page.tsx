@@ -5,7 +5,6 @@ import { Navbar } from '@/components/common/Navbar';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
-import { updateUser } from '@/lib/firestore-service';
 import { useToast } from '@/context/ToastContext';
 import { Moon, Sun, Bell, Lock, LogOut } from 'lucide-react';
 
@@ -42,10 +41,18 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
-      await updateUser(user.uid, {
-        preferences,
+      const response = await fetch(`/api/users/${user.uid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferences }),
+        credentials: 'include',
       });
-      showSuccess('Preferences saved successfully');
+
+      if (response.ok) {
+        showSuccess('Preferences saved successfully');
+      } else {
+        showError('Failed to save preferences');
+      }
     } catch (error) {
       console.error('Error saving preferences:', error);
       showError('Failed to save preferences');

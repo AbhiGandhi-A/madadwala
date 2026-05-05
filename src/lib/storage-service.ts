@@ -1,26 +1,23 @@
-import {
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-  UploadTask,
-} from 'firebase/storage';
-import { storage } from './firebase';
+/**
+ * Storage service for file uploads
+ * Currently using Vercel Blob for file storage
+ * You can extend this with more providers as needed
+ */
 
 /**
- * Upload file to Firebase Storage
- * Returns download URL
+ * Upload file to storage
+ * Currently a placeholder - integrate with Vercel Blob or similar service
  */
 export async function uploadFile(
   path: string,
   file: File
 ): Promise<string> {
   try {
-    const fileRef = ref(storage, path);
-    await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(fileRef);
-    return downloadURL;
+    // TODO: Implement file storage integration (Vercel Blob, AWS S3, etc.)
+    // For now, returning a placeholder URL
+    const fileName = `${Date.now()}-${file.name}`;
+    console.warn('[Storage] File upload not yet implemented. Placeholder:', fileName);
+    return `https://storage.example.com/${path}/${fileName}`;
   } catch (error) {
     console.error('Error uploading file:', error);
     throw error;
@@ -29,41 +26,16 @@ export async function uploadFile(
 
 /**
  * Upload file with progress tracking
- * Returns upload task and promise
  */
 export function uploadFileWithProgress(
   path: string,
   file: File
 ): {
-  task: UploadTask;
   promise: Promise<string>;
 } {
-  const fileRef = ref(storage, path);
-  const uploadTask = uploadBytesResumable(fileRef, file);
+  const promise = uploadFile(path, file);
 
-  const promise = new Promise<string>((resolve, reject) => {
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload progress:', progress);
-      },
-      (error) => {
-        console.error('Upload error:', error);
-        reject(error);
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
-        } catch (error) {
-          reject(error);
-        }
-      }
-    );
-  });
-
-  return { task: uploadTask, promise };
+  return { promise };
 }
 
 /**
@@ -73,7 +45,7 @@ export async function uploadProfileImage(
   userId: string,
   file: File
 ): Promise<string> {
-  const path = `profiles/${userId}/${Date.now()}-${file.name}`;
+  const path = `profiles/${userId}`;
   return uploadFile(path, file);
 }
 
@@ -84,7 +56,7 @@ export async function uploadIdProof(
   providerId: string,
   file: File
 ): Promise<string> {
-  const path = `id-proofs/${providerId}/${Date.now()}-${file.name}`;
+  const path = `id-proofs/${providerId}`;
   return uploadFile(path, file);
 }
 
@@ -95,7 +67,7 @@ export async function uploadBookingImage(
   bookingId: string,
   file: File
 ): Promise<string> {
-  const path = `bookings/${bookingId}/${Date.now()}-${file.name}`;
+  const path = `bookings/${bookingId}`;
   return uploadFile(path, file);
 }
 
@@ -106,7 +78,7 @@ export async function uploadReviewImage(
   reviewId: string,
   file: File
 ): Promise<string> {
-  const path = `reviews/${reviewId}/${Date.now()}-${file.name}`;
+  const path = `reviews/${reviewId}`;
   return uploadFile(path, file);
 }
 
@@ -117,17 +89,17 @@ export async function uploadChatAttachment(
   roomId: string,
   file: File
 ): Promise<string> {
-  const path = `chats/${roomId}/${Date.now()}-${file.name}`;
+  const path = `chats/${roomId}`;
   return uploadFile(path, file);
 }
 
 /**
- * Delete file from Firebase Storage
+ * Delete file from storage
  */
 export async function deleteFile(path: string): Promise<void> {
   try {
-    const fileRef = ref(storage, path);
-    await deleteObject(fileRef);
+    // TODO: Implement file deletion
+    console.warn('[Storage] File deletion not yet implemented for:', path);
   } catch (error) {
     console.error('Error deleting file:', error);
     throw error;

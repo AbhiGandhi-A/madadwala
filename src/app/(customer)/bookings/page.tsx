@@ -6,7 +6,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { getCustomerBookings, updateBooking } from '@/lib/firestore-service';
 import { formatDateTime } from '@/lib/utils';
 import { Calendar, MapPin, X } from 'lucide-react';
 import type { Booking } from '@/types';
@@ -35,8 +34,13 @@ export default function BookingsPage() {
 
       try {
         setLoading(true);
-        const data = await getCustomerBookings(user.uid);
-        setBookings(data as Booking[]);
+        const response = await fetch('/api/bookings', {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setBookings(data.data || []);
+        }
       } catch (error) {
         console.error('Error loading bookings:', error);
         showError('Failed to load bookings');

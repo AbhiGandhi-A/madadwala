@@ -6,7 +6,6 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SkeletonCardList } from '@/components/common/Skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { getProviderPendingRequests, getProviderBookings, updateBooking } from '@/lib/firestore-service';
 import { formatDateTime } from '@/lib/utils';
 import { Briefcase, CheckCircle, Clock, DollarSign } from 'lucide-react';
 import type { Booking } from '@/types';
@@ -30,13 +29,19 @@ export default function ProviderDashboardPage() {
       try {
         setLoading(true);
 
-        // Load pending requests
-        const pending = await getProviderPendingRequests(user.uid);
-        setPendingRequests(pending as Booking[]);
+        // Load pending and all bookings
+        const response = await fetch('/api/bookings', {
+          credentials: 'include',
+        });
 
-        // Load all bookings to calculate stats
-        const allBookings = await getProviderBookings(user.uid);
-        const bookings = allBookings as Booking[];
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const bookings = data.data as Booking[];
+
+        // Filter pending (status === 'pending')
+        const pending = bookings.filter((b) => b.status === 'pending');
+        setPendingRequests(pending);
 
         // Filter active and completed
         const active = bookings.filter((b) =>
